@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -28,13 +27,59 @@ jobs:
       - name: Run test suites
         run: npm test
 
-  deploy:
-    name: Deploy GitHub Pages
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+  release:
+    name: Prepare release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
+    outputs:
+      should_deploy: ${{ steps.merged-pr.outputs.should_deploy }}
+      version: ${{ steps.version.outputs.version }}
+      should_tag: ${{ steps.version.outputs.should_tag }}
+    steps:
+      - name: Check out repository and tags
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Find merged pull request
+        id: merged-pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: pullRequests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+            });
+            const pullRequest = pullRequests.find((pr) => pr.base.ref === "main" && pr.merged_at);
+            if (!pullRequest) {
+              core.notice("Skipping release and deployment because this main-branch push is not associated with a merged pull request.");
+              core.setOutput("should_deploy", "false");
+              return;
+            }
+            core.setOutput("should_deploy", "true");
+            core.setOutput("title", pullRequest.title);
+            core.setOutput("body", pullRequest.body || "");
+      - name: Calculate semantic version
+        if: steps.merged-pr.outputs.should_deploy == 'true'
+        id: version
+        env:
+          PR_TITLE: ${{ steps.merged-pr.outputs.title }}
+          PR_BODY: ${{ steps.merged-pr.outputs.body }}
+        run: |
+          CURRENT_VERSION="$(git tag --list 'v[0-9]*' --sort=-version:refname | head -n 1 | sed 's/^v//')"
+          CURRENT_VERSION="$CURRENT_VERSION" node scripts/next-version.js >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy GitHub Pages
+    if: needs.release.outputs.should_deploy == 'true'
+    needs: [test, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
       pages: write
       id-token: write
     environment:
@@ -42,14 +87,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Prepare static site
+        env:
+          APP_VERSION: ${{ needs.release.outputs.version }}
         run: |
           mkdir _site
           cp index.html app.js renderer.js styles.css favicon.svg _site/
           cp -R vendor _site/vendor
+          printf '{"version":"%s"}\n' "$APP_VERSION" > _site/version.json
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -57,3 +107,12 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Create and push semantic version tag
+        if: needs.release.outputs.should_tag == 'true'
+        env:
+          APP_VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$APP_VERSION" "$GITHUB_SHA" -m "Release v$APP_VERSION"
+          git push origin "v$APP_VERSION"

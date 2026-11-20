@@ -70,6 +70,15 @@ textarea {
   font-size: 13px;
 }
 
+.app-version {
+  margin-left: 1px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 .actions {
   display: flex;
   gap: 8px;
@@ -324,7 +333,7 @@ textarea {
     width: 100%;
   }
 
-  .brand > span:last-child {
+  .brand-name {
     display: none;
   }
 }
