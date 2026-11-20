@@ -237,6 +237,27 @@ document.querySelector("#clear").addEventListener("click", () => {
   updatePreview();
 });
 
+const importButton = document.querySelector("#importMarkdown");
+const markdownFile = document.querySelector("#markdownFile");
+
+importButton.addEventListener("click", () => markdownFile.click());
+
+markdownFile.addEventListener("change", async () => {
+  const file = markdownFile.files?.[0];
+  if (!file) return;
+
+  try {
+    markdownInput.value = await file.text();
+    markdownInput.focus();
+    updatePreview();
+    showToast(`Imported ${file.name}`);
+  } catch {
+    showToast("Could not read the file");
+  } finally {
+    markdownFile.value = "";
+  }
+});
+
 document.querySelector("#copyHtml").addEventListener("click", async () => {
   const html = markdownToHtml(markdownInput.value);
   try {
