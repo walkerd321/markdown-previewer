@@ -2,6 +2,8 @@
 
 A lightweight, browser-based Markdown editor with a live preview and HTML export.
 
+Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewer/).
+
 ## Features
 
 - Live preview with GitHub-flavored Markdown support
