@@ -73,10 +73,33 @@ jobs:
           CURRENT_VERSION="$(git tag --list 'v[0-9]*' --sort=-version:refname | head -n 1 | sed 's/^v//')"
           CURRENT_VERSION="$CURRENT_VERSION" node scripts/next-version.js >> "$GITHUB_OUTPUT"
 
+  build:
+    name: Build Pages artifact
+    if: needs.release.outputs.should_deploy == 'true'
+    needs: [test, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+      - name: Prepare static site
+        env:
+          APP_VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          mkdir _site
+          cp index.html app.js renderer.js styles.css favicon.svg _site/
+          cp -R vendor _site/vendor
+          printf '{"version":"%s"}\n' "$APP_VERSION" > _site/version.json
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
   deploy:
     name: Deploy GitHub Pages
     if: needs.release.outputs.should_deploy == 'true'
-    needs: [test, release]
+    needs: [test, release, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -92,18 +115,6 @@ jobs:
           fetch-depth: 0
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Prepare static site
-        env:
-          APP_VERSION: ${{ needs.release.outputs.version }}
-        run: |
-          mkdir _site
-          cp index.html app.js renderer.js styles.css favicon.svg _site/
-          cp -R vendor _site/vendor
-          printf '{"version":"%s"}\n' "$APP_VERSION" > _site/version.json
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
