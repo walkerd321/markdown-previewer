@@ -8,8 +8,11 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 
 - Live preview with GitHub-flavored Markdown support
 - Import `.md` and `.markdown` files
-- Copy rendered HTML or download a standalone HTML document
-- Automatically save the current draft in browser local storage
+- Drag and drop Markdown files into the editor
+- Download Markdown or copy/download rendered HTML
+- Automatically save the current draft in browser local storage, with overwrite protection and save status
+- Resize and persist the editor/preview split
+- Use `Ctrl`/`⌘` + `B` for bold, `I` for italic, `K` for links, and `S` to download Markdown
 - Sanitize rendered HTML before displaying it
 
 ## Run locally
