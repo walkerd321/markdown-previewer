@@ -4,6 +4,13 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
+test("shows the current application version unobtrusively", async ({ page }) => {
+  await page.route("**/version.json", (route) => route.fulfill({ json: { version: "2.4.6" } }));
+  await page.reload();
+
+  await expect(page.locator("#appVersion")).toHaveText("v2.4.6");
+});
+
 test("updates the preview as Markdown is edited", async ({ page }) => {
   await page.getByRole("textbox", { name: "Markdown input" }).fill("# Live\n\n**updated**");
 

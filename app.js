@@ -5,6 +5,19 @@ const preview = document.querySelector("#preview");
 const wordCount = document.querySelector("#wordCount");
 const toast = document.querySelector("#toast");
 
+fetch("./version.json", { cache: "no-store" })
+  .then((response) => {
+    if (!response.ok) throw new Error(`Version request failed: ${response.status}`);
+    return response.json();
+  })
+  .then(({ version }) => {
+    if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error("Invalid application version");
+    const versionLabel = document.querySelector("#appVersion");
+    versionLabel.textContent = `v${version}`;
+    versionLabel.setAttribute("aria-label", `Version ${version}`);
+  })
+  .catch((error) => console.error("Could not load the application version.", error));
+
 const starter = `# Welcome to Markdown
 
 Write Markdown on the left and see it rendered here instantly.
