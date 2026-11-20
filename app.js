@@ -1,3 +1,5 @@
+import { renderMarkdown } from "./renderer.js";
+
 const markdownInput = document.querySelector("#markdown");
 const preview = document.querySelector("#preview");
 const wordCount = document.querySelector("#wordCount");
@@ -32,18 +34,8 @@ function greet(name) {
 
 Try editing this content.`;
 
-function markdownToHtml(markdown) {
-  const rendered = marked.parse(markdown, {
-    gfm: true,
-    breaks: false,
-  });
-  return DOMPurify.sanitize(rendered, {
-    USE_PROFILES: { html: true },
-  });
-}
-
 function updatePreview() {
-  preview.innerHTML = markdownToHtml(markdownInput.value);
+  preview.innerHTML = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
   const words = markdownInput.value.trim().match(/\S+/g)?.length || 0;
   wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
   localStorage.setItem("markdown-previewer-content", markdownInput.value);
@@ -96,7 +88,7 @@ markdownFile.addEventListener("change", async () => {
 });
 
 document.querySelector("#copyHtml").addEventListener("click", async () => {
-  const html = markdownToHtml(markdownInput.value);
+  const html = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
   try {
     await navigator.clipboard.writeText(html);
     showToast("HTML copied");
@@ -106,7 +98,7 @@ document.querySelector("#copyHtml").addEventListener("click", async () => {
 });
 
 document.querySelector("#downloadHtml").addEventListener("click", () => {
-  const body = markdownToHtml(markdownInput.value);
+  const body = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
   const documentHtml = `<!doctype html>
 <html lang="en">
 <head>
