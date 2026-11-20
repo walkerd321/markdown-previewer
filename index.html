@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Previewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="toolbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">M↓</span>
+          <span>Markdown Previewer</span>
+        </div>
+        <div class="actions">
+          <button id="copyHtml" class="button" type="button">Copy HTML</button>
+          <button id="downloadHtml" class="button button-primary" type="button">Download .html</button>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Markdown editor and preview">
+        <div class="pane editor-pane">
+          <div class="pane-header">
+            <span>MARKDOWN</span>
+            <button id="clear" class="text-button" type="button">Clear</button>
+          </div>
+          <textarea id="markdown" spellcheck="true" aria-label="Markdown input"></textarea>
+        </div>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <article class="pane preview-pane">
+          <div class="pane-header">
+            <span>PREVIEW</span>
+            <span id="wordCount" class="meta"></span>
+          </div>
+          <div id="preview" class="preview"></div>
+        </article>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
