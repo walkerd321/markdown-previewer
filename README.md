@@ -6,15 +6,32 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 
 ## Features
 
-- Live preview with GitHub-flavored Markdown support
-- Import `.md` and `.markdown` files
-- Drag and drop Markdown files into the editor
-- Download Markdown or copy/download rendered HTML
-- Automatically save the current draft in browser local storage, with overwrite protection and save status
-- Resize and persist the editor/preview split
-- Use `Ctrl`/`⌘` + `B` for bold, `I` for italic, `K` for links, and `S` to download Markdown
-- Check for missing image descriptions, heading gaps/duplicates, broken local anchors, and sanitized HTML
-- Sanitize rendered HTML before displaying it
+### Editing and preview
+
+- Update a live preview as you edit, with GitHub-flavored Markdown tables and formatting
+- Insert two spaces with Tab; use `Ctrl`/`⌘` + `B` for bold, `I` for italic, and `K` for a link
+- Show the Markdown word count
+- Generate stable heading IDs so local heading links work in the preview and exported HTML
+
+### Documents and saving
+
+- Import `.md` and `.markdown` files using the file picker or drag and drop
+- Confirm before an import replaces the current draft or Clear removes it
+- Automatically save the current draft in this browser and show its save status
+- Download the Markdown source with **Save .md** or `Ctrl+S` / `⌘+S`
+- Copy rendered HTML or download it as a standalone HTML file
+
+### Quality and safety
+
+- Check for missing image alt text, skipped heading levels, duplicate headings, broken local links, and raw or unsafe HTML/URLs
+- Review warnings and errors, then select a finding to jump to its source in the editor
+- Sanitize rendered HTML before showing or exporting it
+
+### Workspace and appearance
+
+- Choose System, Light, or Dark theme; remember the choice or follow the operating-system setting
+- Resize the editor and preview with the mouse or keyboard; remember the split between visits
+- Show the application version in the toolbar
 
 ## Run locally
 
@@ -37,7 +54,7 @@ npx playwright install chromium
 npm test
 ```
 
-The unit tests cover Markdown rendering and HTML sanitization. The Playwright tests cover editing, file import, clipboard copy, HTML download, and clearing the editor.
+Unit tests cover Markdown rendering, sanitization, quality diagnostics, heading anchors, and semantic version calculation. Playwright tests cover theme behavior, editing and saving, imports and drag-and-drop, quality checks, pane resizing, shortcuts, and HTML/Markdown exports.
 
 ## Releases
 
