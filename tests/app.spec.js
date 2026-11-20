@@ -49,11 +49,12 @@ test("persists an explicit Light theme regardless of system preference", async (
 test("keeps the theme selector and toolbar actions visible on a narrow screen", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
 
-  for (const selector of ["#themeSelect", "#importMarkdown", "#copyHtml", "#downloadHtml"]) {
+  for (const selector of ["#themeSelect", "#importMarkdown", "#copyHtml", "#downloadHtml", "#downloadMarkdown"]) {
     const bounds = await page.locator(selector).boundingBox();
     expect(bounds).not.toBeNull();
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(116);
   }
 });
 
@@ -195,7 +196,7 @@ test("downloads the Markdown source", async ({ page }) => {
   const markdown = "# Source\n\nKeep **formatting**.";
   await page.getByRole("textbox", { name: "Markdown input" }).fill(markdown);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download .md" }).click();
+  await page.getByRole("button", { name: "Save .md" }).click();
   const download = await downloadPromise;
 
   expect(download.suggestedFilename()).toBe("markdown-export.md");
