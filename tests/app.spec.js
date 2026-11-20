@@ -11,6 +11,52 @@ test("shows the current application version unobtrusively", async ({ page }) => 
   await expect(page.locator("#appVersion")).toHaveText("v2.4.6");
 });
 
+test("defaults to System and follows operating system appearance changes", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.reload();
+
+  await expect(page.locator("#themeSelect")).toHaveValue("system");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(18, 24, 34)");
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(237, 240, 245)");
+});
+
+test("persists an explicit Dark theme regardless of system preference", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.getByLabel("Color theme").selectOption("dark");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(18, 24, 34)");
+  await expect(page.locator("#markdown")).toHaveCSS("background-color", "rgb(23, 30, 41)");
+  await expect(page.locator("#preview")).toHaveCSS("background-color", "rgb(29, 36, 49)");
+
+  await page.reload();
+
+  await expect(page.getByLabel("Color theme")).toHaveValue("dark");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(18, 24, 34)");
+});
+
+test("persists an explicit Light theme regardless of system preference", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.getByLabel("Color theme").selectOption("light");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(237, 240, 245)");
+
+  await page.reload();
+
+  await expect(page.getByLabel("Color theme")).toHaveValue("light");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(237, 240, 245)");
+});
+
+test("keeps the theme selector and toolbar actions visible on a narrow screen", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+
+  for (const selector of ["#themeSelect", "#importMarkdown", "#copyHtml", "#downloadHtml"]) {
+    const bounds = await page.locator(selector).boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
+  }
+});
+
 test("updates the preview as Markdown is edited", async ({ page }) => {
   await page.getByRole("textbox", { name: "Markdown input" }).fill("# Live\n\n**updated**");
 
