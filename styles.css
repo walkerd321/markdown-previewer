@@ -453,10 +453,16 @@ textarea {
 @media (max-width: 760px) {
   .app {
     padding: 0;
+    grid-template-rows: 116px minmax(0, 1fr);
   }
 
   .toolbar {
+    display: grid;
+    grid-template-rows: 28px minmax(0, 1fr);
+    align-content: center;
+    gap: 4px;
     border-radius: 0;
+    padding: 6px 12px;
   }
 
   .workspace {
@@ -480,6 +486,35 @@ textarea {
   }
 
   .shortcut-help {
+    display: none;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .theme-select {
+    width: 100%;
+    max-width: none;
+    height: 32px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+
+  .button {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    padding: 0 4px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .brand-name {
     display: none;
   }
 
