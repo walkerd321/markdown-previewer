@@ -19,7 +19,7 @@
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">M↓</span>
           <span class="brand-name">Markdown Previewer</span>
-          <span id="appVersion" class="app-version" aria-label="Version 1.0.0">v1.0.0</span>
+          <span id="appVersion" class="app-version" aria-label="Version 2.0.0">v2.0.0</span>
         </div>
         <div class="actions">
           <label class="sr-only" for="themeSelect">Color theme</label>
@@ -35,16 +35,32 @@
         </div>
       </header>
 
-      <section class="workspace" aria-label="Markdown editor and preview">
-        <div class="pane editor-pane">
-          <div class="pane-header">
+      <section id="workspace" class="workspace" aria-label="Markdown editor and preview">
+        <div id="editorPane" class="pane editor-pane">
+          <div class="pane-header editor-header">
             <span>MARKDOWN</span>
-            <button id="clear" class="text-button" type="button">Clear</button>
+            <div class="editor-header-tools">
+              <span id="draftStatus" class="meta">Saved locally</span>
+              <span class="shortcut-help">Ctrl/⌘ B bold · I italic · K link · S save</span>
+              <button id="downloadMarkdown" class="text-button" type="button" title="Download Markdown (Ctrl/⌘+S)">Download .md</button>
+              <button id="clear" class="text-button" type="button">Clear</button>
+            </div>
           </div>
           <textarea id="markdown" spellcheck="true" aria-label="Markdown input"></textarea>
+          <div class="drop-hint" aria-hidden="true">Drop a Markdown file to import</div>
         </div>
 
-        <div class="divider" aria-hidden="true"></div>
+        <div
+          id="resizeHandle"
+          class="divider"
+          role="separator"
+          tabindex="0"
+          aria-orientation="vertical"
+          aria-label="Resize editor and preview"
+          aria-valuemin="20"
+          aria-valuemax="80"
+          aria-valuenow="50"
+        ></div>
 
         <article class="pane preview-pane">
           <div class="pane-header">
