@@ -65,6 +65,41 @@ test("updates the preview as Markdown is edited", async ({ page }) => {
   await expect(page.locator("#preview strong")).toHaveText("updated");
 });
 
+test("reports Markdown quality issues and jumps to their source", async ({ page }) => {
+  const markdown = [
+    "# Guide",
+    "",
+    "### Details",
+    "",
+    "![ ](diagram.png)",
+    "[Missing](#missing)",
+    "### Details",
+    "[Unsafe](javascript:alert(1))",
+    "<div>Embedded HTML</div>",
+  ].join("\n");
+  await page.getByRole("textbox", { name: "Markdown input" }).fill(markdown);
+  await page.getByRole("button", { name: "Quality check" }).click();
+
+  await expect(page.locator("#qualitySummary")).toHaveText("1 error, 5 warnings found.");
+  await expect(page.locator("#qualityResults li")).toHaveCount(6);
+
+  await page.getByRole("button", { name: /Line 3: Heading level skips/ }).click();
+  const selectedText = await page.getByRole("textbox", { name: "Markdown input" }).evaluate(
+    (input) => input.value.slice(input.selectionStart, input.selectionEnd),
+  );
+  expect(selectedText).toBe("### Details");
+});
+
+test("reports a clean Markdown document", async ({ page }) => {
+  await page.getByRole("textbox", { name: "Markdown input" }).fill("# Guide\n\n[Top](#guide)");
+  await expect(page.locator("#preview h1")).toHaveAttribute("id", "guide");
+  await expect(page.locator("#preview a")).toHaveAttribute("href", "#guide");
+  await page.getByRole("button", { name: "Quality check" }).click();
+
+  await expect(page.locator("#qualitySummary")).toHaveText("No issues found.");
+  await expect(page.locator("#qualityResults")).toBeEmpty();
+});
+
 test("saves the current draft locally and shows its save status", async ({ page }) => {
   const editor = page.getByRole("textbox", { name: "Markdown input" });
   await editor.fill("# Draft");
@@ -175,7 +210,7 @@ test("copies sanitized rendered HTML", async ({ page }) => {
   await page.getByRole("button", { name: "Copy HTML" }).click();
 
   const clipboard = await page.evaluate(() => navigator.clipboard.readText());
-  expect(clipboard).toContain("<h1>Copy test</h1>");
+  expect(clipboard).toContain('<h1 id="copy-test">Copy test</h1>');
 });
 
 test("downloads a complete HTML document", async ({ page }) => {
@@ -188,7 +223,7 @@ test("downloads a complete HTML document", async ({ page }) => {
   const stream = await download.createReadStream();
   let html = "";
   for await (const chunk of stream) html += chunk.toString();
-  expect(html).toContain("<h1>Download test</h1>");
+  expect(html).toContain('<h1 id="download-test">Download test</h1>');
   expect(html).toContain("<!doctype html>");
 });
 

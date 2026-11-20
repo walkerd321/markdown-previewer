@@ -88,7 +88,7 @@ jobs:
           APP_VERSION: ${{ needs.release.outputs.version }}
         run: |
           mkdir _site
-          cp index.html app.js renderer.js styles.css favicon.svg _site/
+          cp index.html app.js renderer.js quality.js markdown-headings.js styles.css favicon.svg _site/
           cp -R vendor _site/vendor
           printf '{"version":"%s"}\n' "$APP_VERSION" > _site/version.json
       - name: Upload Pages artifact

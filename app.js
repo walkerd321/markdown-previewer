@@ -1,4 +1,5 @@
 import { renderMarkdown } from "./renderer.js";
+import { checkMarkdownQuality } from "./quality.js";
 
 const markdownInput = document.querySelector("#markdown");
 const preview = document.querySelector("#preview");
@@ -9,6 +10,10 @@ const themeSelect = document.querySelector("#themeSelect");
 const workspace = document.querySelector("#workspace");
 const resizeHandle = document.querySelector("#resizeHandle");
 const editorPane = document.querySelector("#editorPane");
+const qualityToggle = document.querySelector("#qualityToggle");
+const qualityPanel = document.querySelector("#qualityPanel");
+const qualitySummary = document.querySelector("#qualitySummary");
+const qualityResults = document.querySelector("#qualityResults");
 
 themeSelect.value = document.documentElement.dataset.theme;
 themeSelect.addEventListener("change", () => {
@@ -65,6 +70,7 @@ function updatePreview() {
   wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
   localStorage.setItem("markdown-previewer-content", markdownInput.value);
   draftStatus.textContent = "Saved locally";
+  if (!qualityPanel.hidden) renderQualityResults();
 }
 
 function showToast(message) {
@@ -73,6 +79,40 @@ function showToast(message) {
   clearTimeout(showToast.timeout);
   showToast.timeout = setTimeout(() => toast.classList.remove("visible"), 1800);
 }
+
+function renderQualityResults() {
+  const issues = checkMarkdownQuality(markdownInput.value);
+  const errors = issues.filter((issue) => issue.severity === "error").length;
+  const warnings = issues.length - errors;
+
+  qualitySummary.textContent = issues.length
+    ? `${errors} ${errors === 1 ? "error" : "errors"}, ${warnings} ${warnings === 1 ? "warning" : "warnings"} found.`
+    : "No issues found.";
+  qualityResults.replaceChildren();
+
+  for (const issue of issues) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `quality-issue quality-issue-${issue.severity}`;
+    button.textContent = `${issue.severity === "error" ? "Error" : "Warning"} · Line ${issue.line}: ${issue.message}`;
+    button.addEventListener("click", () => {
+      markdownInput.focus();
+      markdownInput.setSelectionRange(issue.start, issue.end);
+      const lineHeight = Number.parseFloat(getComputedStyle(markdownInput).lineHeight);
+      markdownInput.scrollTop = Math.max(0, (issue.line - 1) * lineHeight - markdownInput.clientHeight / 2);
+    });
+    item.append(button);
+    qualityResults.append(item);
+  }
+}
+
+qualityToggle.addEventListener("click", () => {
+  const isOpen = qualityToggle.getAttribute("aria-expanded") === "true";
+  qualityToggle.setAttribute("aria-expanded", String(!isOpen));
+  qualityPanel.hidden = isOpen;
+  if (!isOpen) renderQualityResults();
+});
 
 function downloadFile(filename, contents, type) {
   const blob = new Blob([contents], { type });
