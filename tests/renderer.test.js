@@ -14,8 +14,16 @@ describe("renderMarkdown", () => {
   it("renders headings and inline links", () => {
     const html = renderMarkdown("# Guide\n\n[Docs](https://example.com)", marked, sanitizer);
 
-    assert.match(html, /<h1>Guide<\/h1>/);
+    assert.match(html, /<h1 id="guide">Guide<\/h1>/);
     assert.match(html, /<a href="https:\/\/example\.com">Docs<\/a>/);
+  });
+
+  it("adds unique heading IDs for working local links", () => {
+    const html = renderMarkdown("# What's New\n\n[Jump](#whats-new)\n\n# What's New", marked, sanitizer);
+
+    assert.match(html, /<h1 id="whats-new">What's New<\/h1>/);
+    assert.match(html, /<a href="#whats-new">Jump<\/a>/);
+    assert.match(html, /<h1 id="whats-new-1">What's New<\/h1>/);
   });
 
   it("renders inline and fenced code without interpreting its contents", () => {

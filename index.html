@@ -19,7 +19,7 @@
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">M↓</span>
           <span class="brand-name">Markdown Previewer</span>
-          <span id="appVersion" class="app-version" aria-label="Version 2.0.0">v2.0.0</span>
+          <span id="appVersion" class="app-version" aria-label="Version 2.1.0">v2.1.0</span>
         </div>
         <div class="actions">
           <label class="sr-only" for="themeSelect">Color theme</label>
@@ -63,10 +63,23 @@
         ></div>
 
         <article class="pane preview-pane">
-          <div class="pane-header">
+          <div class="pane-header preview-header">
             <span>PREVIEW</span>
-            <span id="wordCount" class="meta"></span>
+            <div class="preview-header-tools">
+              <button
+                id="qualityToggle"
+                class="text-button"
+                type="button"
+                aria-expanded="false"
+                aria-controls="qualityPanel"
+              >Quality check</button>
+              <span id="wordCount" class="meta"></span>
+            </div>
           </div>
+          <section id="qualityPanel" class="quality-panel" aria-label="Markdown quality results" hidden>
+            <div id="qualitySummary" class="quality-summary" role="status" aria-live="polite"></div>
+            <ul id="qualityResults" class="quality-results"></ul>
+          </section>
           <div id="preview" class="preview"></div>
         </article>
       </section>
