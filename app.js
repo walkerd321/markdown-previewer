@@ -4,6 +4,14 @@ const markdownInput = document.querySelector("#markdown");
 const preview = document.querySelector("#preview");
 const wordCount = document.querySelector("#wordCount");
 const toast = document.querySelector("#toast");
+const themeSelect = document.querySelector("#themeSelect");
+
+themeSelect.value = document.documentElement.dataset.theme;
+themeSelect.addEventListener("change", () => {
+  const theme = themeSelect.value;
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem("markdown-previewer-theme", theme);
+});
 
 fetch("./version.json", { cache: "no-store" })
   .then((response) => {
