@@ -1,0 +1,26 @@
+{
+  "name": "markdown-previewer",
+  "version": "1.0.0",
+  "description": "A lightweight browser-based Markdown editor and HTML previewer.",
+  "main": "app.js",
+  "scripts": {
+    "start": "python -m http.server 4173",
+    "test": "node --check app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/walkerd321/markdown-previewer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/walkerd321/markdown-previewer/issues"
+  },
+  "homepage": "https://github.com/walkerd321/markdown-previewer#readme",
+  "dependencies": {
+    "dompurify": "^3.4.18",
+    "marked": "^18.2.1"
+  }
+}
