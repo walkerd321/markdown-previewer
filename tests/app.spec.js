@@ -179,6 +179,25 @@ test("resizes both panes with the separator and remembers the split", async ({ p
   await expect(separator).toHaveAttribute("aria-valuenow", keyboardValue);
 });
 
+test("resets the pane split to a balanced 50 percent", async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.evaluate(() => localStorage.setItem("markdown-previewer-pane-ratio", "0.2"));
+  await page.reload();
+
+  const separator = page.getByRole("separator", { name: "Resize editor and preview" });
+  await separator.focus();
+  await page.keyboard.press("Home");
+
+  await expect(separator).toHaveAttribute("aria-valuenow", "50");
+  const editorWidth = await page.locator("#editorPane").evaluate((element) => element.getBoundingClientRect().width);
+  const previewWidth = await page.locator(".preview-pane").evaluate((element) => element.getBoundingClientRect().width);
+  expect(Math.abs(editorWidth - previewWidth)).toBeLessThan(20);
+
+  await page.keyboard.press("ArrowRight");
+  await separator.dblclick();
+  await expect(separator).toHaveAttribute("aria-valuenow", "50");
+});
+
 test("supports formatting, link, and Markdown save shortcuts", async ({ page }) => {
   const editor = page.getByRole("textbox", { name: "Markdown input" });
   await editor.fill("bold");

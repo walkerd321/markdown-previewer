@@ -537,7 +537,19 @@ resizeHandle.addEventListener("pointercancel", () => {
   resizing = false;
   savePaneRatio();
 });
+resizeHandle.addEventListener("dblclick", () => {
+  paneRatio = 0.5;
+  applyPaneRatio();
+  savePaneRatio();
+});
 resizeHandle.addEventListener("keydown", (event) => {
+  if (event.key === "Home") {
+    event.preventDefault();
+    paneRatio = 0.5;
+    applyPaneRatio();
+    savePaneRatio();
+    return;
+  }
   const mobile = mobileLayout.matches;
   const increase = mobile ? event.key === "ArrowDown" : event.key === "ArrowRight";
   const decrease = mobile ? event.key === "ArrowUp" : event.key === "ArrowLeft";
