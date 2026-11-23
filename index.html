@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4c61dd" />
+    <meta name="description" content="A private, offline-ready Markdown editor with live preview and document quality checks." />
+    <meta property="og:title" content="Markdown Previewer" />
+    <meta property="og:description" content="Edit, preview, check, and export Markdown locally in your browser." />
+    <meta property="og:type" content="website" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
     <title>Markdown Previewer</title>
     <script>
       (() => {
@@ -11,7 +17,8 @@
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="styles.css?v=2.2.7" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css?v=2.3.0" />
   </head>
   <body>
     <main class="app">
@@ -19,7 +26,7 @@
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">M↓</span>
           <span class="brand-name">Markdown Previewer</span>
-          <span id="appVersion" class="app-version" aria-label="Version 2.2.7">v2.2.7</span>
+          <span id="appVersion" class="app-version" aria-label="Version 2.3.0">v2.3.0</span>
         </div>
         <div class="document-controls" aria-label="Draft management">
           <label class="sr-only" for="draftSelect">Draft</label>
@@ -100,6 +107,7 @@
                 aria-expanded="false"
                 aria-controls="qualityPanel"
               >Quality check</button>
+              <button id="printPreview" class="text-button" type="button">Print</button>
               <span id="wordCount" class="meta"></span>
             </div>
           </div>
@@ -118,6 +126,6 @@
     </main>
     <script src="vendor/marked.umd.js"></script>
     <script src="vendor/purify.min.js"></script>
-    <script type="module" src="app.js?v=2.2.7"></script>
+    <script type="module" src="app.js?v=2.3.0"></script>
   </body>
 </html>

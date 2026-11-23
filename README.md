@@ -37,6 +37,8 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 - Resize the editor and preview with the mouse or keyboard; remember the split between visits
 - Reset the pane split to a balanced 50/50 view by double-clicking the divider or pressing Home
 - Show the application version in the toolbar
+- Install the application as a PWA and continue using cached assets offline
+- Print only the rendered preview, with editor and toolbar controls excluded
 
 ## Run locally
 

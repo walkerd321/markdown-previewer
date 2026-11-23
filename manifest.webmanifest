@@ -1,0 +1,18 @@
+{
+  "name": "Markdown Previewer",
+  "short_name": "Markdown",
+  "description": "A private, offline-ready Markdown editor and previewer.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#edf0f5",
+  "theme_color": "#4c61dd",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
