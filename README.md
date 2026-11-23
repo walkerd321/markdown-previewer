@@ -12,12 +12,16 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 - Insert two spaces with Tab; use `Ctrl`/`⌘` + `B` for bold, `I` for italic, and `K` for a link
 - Show the Markdown word count
 - Generate stable heading IDs so local heading links work in the preview and exported HTML
+- Find and replace text with match navigation
+- Browse a clickable document outline
 
 ### Documents and saving
 
 - Import `.md` and `.markdown` files using the file picker or drag and drop
 - Confirm before an import replaces the current draft or Clear removes it
 - Automatically save the current draft in this browser and show its save status
+- Manage multiple named drafts and rename the active document
+- Warn before replacing or clearing content and before closing with unsaved file changes
 - Download the Markdown source with **Save .md** or `Ctrl+S` / `⌘+S`
 - Copy rendered HTML or download it as a standalone HTML file
 
