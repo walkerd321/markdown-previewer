@@ -35,6 +35,7 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 
 - Choose System, Light, or Dark theme; remember the choice or follow the operating-system setting
 - Resize the editor and preview with the mouse or keyboard; remember the split between visits
+- Reset the pane split to a balanced 50/50 view by double-clicking the divider or pressing Home
 - Show the application version in the toolbar
 
 ## Run locally
