@@ -5,10 +5,25 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("shows the current application version unobtrusively", async ({ page }) => {
+  await page.evaluate(async () => {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
+  });
   await page.route("**/version.json", (route) => route.fulfill({ json: { version: "2.4.6" } }));
   await page.reload();
 
   await expect(page.locator("#appVersion")).toHaveText("v2.4.6");
+});
+
+test("includes PWA metadata and service worker registration", async ({ page }) => {
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "./manifest.webmanifest");
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#4c61dd");
+});
+
+test("exposes a print action for the rendered preview", async ({ page }) => {
+  await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
 });
 
 test("defaults to System and follows operating system appearance changes", async ({ page }) => {

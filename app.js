@@ -670,6 +670,18 @@ window.addEventListener("beforeunload", (event) => {
   event.returnValue = "";
 });
 
+document.querySelector("#printPreview").addEventListener("click", () => {
+  window.print();
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.error("Could not register the offline service worker.", error);
+    });
+  });
+}
+
 document.querySelector("#copyHtml").addEventListener("click", async () => {
   const html = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
   try {

@@ -622,6 +622,48 @@ textarea {
   opacity: 1;
 }
 
+@media print {
+  @page {
+    margin: 20mm;
+  }
+
+  html,
+  body,
+  .app,
+  .workspace {
+    height: auto;
+  }
+
+  .toolbar,
+  .editor-pane,
+  .divider,
+  .quality-panel,
+  .outline-panel,
+  .toast {
+    display: none !important;
+  }
+
+  .app,
+  .workspace,
+  .preview-pane {
+    display: block;
+  }
+
+  .preview-pane {
+    border: 0;
+  }
+
+  .preview-pane .pane-header {
+    display: none;
+  }
+
+  .preview {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+  }
+}
+
 @media (min-width: 761px) and (max-width: 1200px) {
   .app {
     grid-template-rows: 120px minmax(0, 1fr);
