@@ -492,7 +492,7 @@ function applyPaneRatio() {
 
   const firstPaneSize = Math.round(totalSize * paneRatio);
   if (mobile) {
-    workspace.style.gridTemplateRows = `${firstPaneSize}px 7px minmax(0, 1fr)`;
+    workspace.style.gridTemplateRows = "minmax(0, 1fr) 7px minmax(0, 1fr)";
     workspace.style.gridTemplateColumns = "";
     resizeHandle.setAttribute("aria-orientation", "horizontal");
   } else {
