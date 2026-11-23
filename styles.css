@@ -579,6 +579,33 @@ textarea {
   background: transparent;
 }
 
+.preview pre {
+  position: relative;
+  padding-top: 38px;
+}
+
+.code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.code-copy:hover,
+.code-copy:focus-visible {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
 .preview blockquote {
   margin: 1em 0;
   border-left: 4px solid var(--quote-border);

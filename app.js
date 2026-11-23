@@ -201,8 +201,56 @@ function renameActiveDraft() {
   showToast("Draft renamed");
 }
 
+let previewUpdateTimer = null;
+let previewUpdateFrame = null;
+
 function updatePreview() {
+  if (previewUpdateTimer) clearTimeout(previewUpdateTimer);
+  if (previewUpdateFrame) cancelAnimationFrame(previewUpdateFrame);
+
+  previewUpdateTimer = setTimeout(() => {
+    previewUpdateFrame = requestAnimationFrame(() => {
+      preview.innerHTML = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
+      addCodeCopyButtons();
+      const words = markdownInput.value.trim().match(/\S+/g)?.length || 0;
+      wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
+      localStorage.setItem("markdown-previewer-content", markdownInput.value);
+      saveActiveDraft({ touch: true });
+      draftStatus.textContent = dirty ? "Unsaved file changes" : "Saved locally";
+      if (!qualityPanel.hidden) renderQualityResults();
+      if (!outlinePanel.hidden) renderOutline();
+    });
+  }, markdownInput.value.length > 50_000 ? 120 : 40);
+}
+
+function addCodeCopyButtons() {
+  for (const block of preview.querySelectorAll("pre")) {
+    if (block.querySelector(".code-copy")) continue;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "code-copy";
+    button.textContent = "Copy";
+    button.setAttribute("aria-label", "Copy code block");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(block.querySelector("code")?.textContent || block.textContent);
+        button.textContent = "Copied";
+        setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1200);
+      } catch {
+        showToast("Could not copy code");
+      }
+    });
+    block.append(button);
+  }
+}
+
+function updatePreviewImmediate() {
+  if (previewUpdateTimer) clearTimeout(previewUpdateTimer);
+  if (previewUpdateFrame) cancelAnimationFrame(previewUpdateFrame);
   preview.innerHTML = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
+  addCodeCopyButtons();
   const words = markdownInput.value.trim().match(/\S+/g)?.length || 0;
   wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
   localStorage.setItem("markdown-previewer-content", markdownInput.value);

@@ -134,6 +134,11 @@ test("updates the preview as Markdown is edited", async ({ page }) => {
   await expect(page.locator("#preview strong")).toHaveText("updated");
 });
 
+test("adds a Copy control to fenced code blocks", async ({ page }) => {
+  await page.getByRole("textbox", { name: "Markdown input" }).fill("```js\nconsole.log('hello')\n```");
+  await expect(page.getByRole("button", { name: "Copy code block" })).toBeVisible();
+});
+
 test("toggles focus mode and exits with Escape", async ({ page }) => {
   await page.getByRole("button", { name: "Focus" }).click();
   await expect(page.locator("body")).toHaveClass(/focus-mode/);
