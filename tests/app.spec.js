@@ -77,6 +77,16 @@ test("uses equal-height stacked panes on narrow screens", async ({ page }) => {
   expect(Math.abs(editorHeight - previewHeight)).toBeLessThan(2);
 });
 
+test("uses the full editor pane height without an open find panel", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.reload();
+
+  const editorHeight = await page.locator("#editorPane").evaluate((element) => element.getBoundingClientRect().height);
+  const textareaHeight = await page.locator("#markdown").evaluate((element) => element.getBoundingClientRect().height);
+  expect(editorHeight).toBeGreaterThan(200);
+  expect(editorHeight - textareaHeight).toBeLessThan(60);
+});
+
 test("updates the preview as Markdown is edited", async ({ page }) => {
   await page.getByRole("textbox", { name: "Markdown input" }).fill("# Live\n\n**updated**");
 
