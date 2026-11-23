@@ -208,6 +208,10 @@ function updatePreview() {
   if (previewUpdateTimer) clearTimeout(previewUpdateTimer);
   if (previewUpdateFrame) cancelAnimationFrame(previewUpdateFrame);
 
+  localStorage.setItem("markdown-previewer-content", markdownInput.value);
+  saveActiveDraft({ touch: true });
+  draftStatus.textContent = dirty ? "Unsaved file changes" : "Saved locally";
+
   previewUpdateTimer = setTimeout(() => {
     previewUpdateFrame = requestAnimationFrame(() => {
       preview.innerHTML = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
