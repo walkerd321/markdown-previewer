@@ -54,8 +54,17 @@ test("keeps the theme selector and toolbar actions visible on a narrow screen", 
     expect(bounds).not.toBeNull();
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(156);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(116);
   }
+});
+
+test("restores the narrow-screen workspace height", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+
+  const toolbarHeight = await page.locator(".toolbar").evaluate((element) => element.getBoundingClientRect().height);
+  const workspaceHeight = await page.locator("#workspace").evaluate((element) => element.getBoundingClientRect().height);
+  expect(toolbarHeight).toBe(116);
+  expect(workspaceHeight).toBeGreaterThan(680);
 });
 
 test("updates the preview as Markdown is edited", async ({ page }) => {
