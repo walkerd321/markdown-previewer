@@ -622,6 +622,47 @@ textarea {
   opacity: 1;
 }
 
+@media (min-width: 761px) and (max-width: 1200px) {
+  .app {
+    grid-template-rows: 112px minmax(0, 1fr);
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 48px 48px;
+    align-items: center;
+    row-gap: 0;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .document-controls {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    margin: 0;
+  }
+
+  .draft-select {
+    width: 140px;
+  }
+
+  .draft-name {
+    width: 150px;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 760px) {
   .app {
     padding: 0;

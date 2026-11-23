@@ -1,6 +1,6 @@
 {
   "name": "markdown-previewer",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "A lightweight browser-based Markdown editor and HTML previewer.",
   "main": "app.js",
   "scripts": {
