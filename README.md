@@ -14,6 +14,9 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 - Generate stable heading IDs so local heading links work in the preview and exported HTML
 - Find and replace text with match navigation
 - Browse a clickable document outline
+- Synchronize editor and preview scrolling
+- Enter distraction-free focus mode
+- Paste clipboard images into the Markdown as local data URLs
 
 ### Documents and saving
 

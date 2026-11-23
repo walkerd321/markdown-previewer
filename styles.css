@@ -105,6 +105,36 @@ textarea {
   margin: 0 12px;
 }
 
+.sync-scroll-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sync-scroll-control input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--blue);
+}
+
+.focus-mode .toolbar,
+.focus-mode .divider {
+  display: none;
+}
+
+.focus-mode .app {
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+}
+
+.focus-mode .workspace {
+  border: 0;
+  border-radius: 0;
+}
+
 .draft-select,
 .draft-name {
   height: 38px;
@@ -705,6 +735,11 @@ textarea {
     justify-self: stretch;
     justify-content: flex-end;
   }
+
+  .sync-scroll-control,
+  #focusMode {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -766,6 +801,11 @@ textarea {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
+  }
+
+  .sync-scroll-control,
+  #focusMode {
+    display: none;
   }
 
   .theme-select {
