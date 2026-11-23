@@ -56,6 +56,10 @@ npm start
 
 Open [http://localhost:4173](http://localhost:4173).
 
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the remaining professionalization plan.
+
 ## Tests
 
 Requires Node.js 24 or newer and Python 3.
