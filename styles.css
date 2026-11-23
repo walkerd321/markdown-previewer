@@ -266,6 +266,14 @@ textarea {
 }
 
 .preview-pane {
+  grid-template-rows: 46px minmax(0, 1fr);
+}
+
+.preview-pane:has(.quality-panel:not([hidden])) {
+  grid-template-rows: 46px auto minmax(0, 1fr);
+}
+
+.preview-pane:has(.outline-panel:not([hidden])) {
   grid-template-rows: 46px auto minmax(0, 1fr);
 }
 
@@ -328,6 +336,10 @@ textarea {
 
 .editor-pane {
   position: relative;
+  grid-template-rows: 46px minmax(0, 1fr);
+}
+
+.editor-pane:has(.find-replace-panel:not([hidden])) {
   grid-template-rows: 46px auto minmax(0, 1fr);
 }
 
