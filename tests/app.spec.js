@@ -58,6 +58,31 @@ test("keeps the theme selector and toolbar actions visible on a narrow screen", 
   }
 });
 
+test("keeps the toolbar controls visible at tablet width", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+
+  const toolbar = await page.locator(".toolbar").boundingBox();
+  expect(toolbar.height).toBe(112);
+
+  for (const selector of [
+    "#draftSelect",
+    "#draftName",
+    "#newDraft",
+    "#themeSelect",
+    "#importMarkdown",
+    "#copyHtml",
+    "#downloadHtml",
+    "#downloadMarkdown",
+  ]) {
+    const bounds = await page.locator(selector).boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(1024);
+    expect(bounds.y).toBeGreaterThanOrEqual(toolbar.y);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(toolbar.y + toolbar.height);
+  }
+});
+
 test("restores the narrow-screen workspace height", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
 
