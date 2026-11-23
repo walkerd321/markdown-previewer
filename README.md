@@ -17,6 +17,8 @@ Try the [live Markdown Previewer](https://walkerd321.github.io/markdown-previewe
 - Synchronize editor and preview scrolling
 - Enter distraction-free focus mode
 - Paste clipboard images into the Markdown as local data URLs
+- Debounce live preview rendering for large documents
+- Add Copy controls to rendered fenced code blocks
 
 ### Documents and saving
 
