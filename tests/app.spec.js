@@ -54,7 +54,7 @@ test("keeps the theme selector and toolbar actions visible on a narrow screen", 
     expect(bounds).not.toBeNull();
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(116);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(156);
   }
 });
 
@@ -63,6 +63,55 @@ test("updates the preview as Markdown is edited", async ({ page }) => {
 
   await expect(page.locator("#preview h1")).toHaveText("Live");
   await expect(page.locator("#preview strong")).toHaveText("updated");
+});
+
+test("creates, renames, switches, and preserves named drafts", async ({ page }) => {
+  await page.getByLabel("Draft name").fill("Project Notes");
+  await page.getByLabel("Draft name").press("Enter");
+  await page.getByRole("textbox", { name: "Markdown input" }).fill("# Project notes");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "New" }).click();
+
+  await expect(page.getByLabel("Draft name")).toHaveValue("Draft 2");
+  await expect(page.getByRole("textbox", { name: "Markdown input" })).toHaveValue("");
+  await page.getByRole("textbox", { name: "Markdown input" }).fill("# Second draft");
+  await page.getByLabel("Draft name").fill("Meeting Notes");
+  await page.getByLabel("Draft name").press("Enter");
+
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByLabel("Draft", { exact: true }).selectOption({ label: "Project Notes" });
+  await expect(page.getByRole("textbox", { name: "Markdown input" })).toHaveValue("# Project notes");
+
+  await page.reload();
+  await page.getByLabel("Draft", { exact: true }).selectOption({ label: "Project Notes" });
+  await expect(page.getByRole("textbox", { name: "Markdown input" })).toHaveValue("# Project notes");
+});
+
+test("finds, replaces, and navigates document text", async ({ page }) => {
+  const editor = page.getByRole("textbox", { name: "Markdown input" });
+  await editor.fill("Alpha beta\nAlpha gamma");
+  await page.getByRole("button", { name: "Find" }).click();
+  await page.getByRole("searchbox", { name: "Find" }).fill("Alpha");
+  await page.getByRole("button", { name: "Next match" }).click();
+  await expect(page.getByRole("searchbox", { name: "Find" })).toHaveValue("Alpha");
+  await expect(page.locator("#findStatus")).toHaveText("1 of 2");
+
+  await page.getByRole("textbox", { name: "Replace" }).fill("Omega");
+  await page.getByRole("button", { name: "All" }).click();
+  await expect(editor).toHaveValue("Omega beta\nOmega gamma");
+});
+
+test("shows a clickable document outline", async ({ page }) => {
+  await page.getByRole("textbox", { name: "Markdown input" }).fill("# Overview\n\n## Details\n\n### Example");
+  await page.getByRole("button", { name: "Outline" }).click();
+
+  await expect(page.locator("#outlineResults")).toContainText("Overview");
+  await expect(page.locator("#outlineResults")).toContainText("Details");
+  await page.getByRole("button", { name: "· Details" }).click();
+  const selectedText = await page.getByRole("textbox", { name: "Markdown input" }).evaluate(
+    (input) => input.value.slice(input.selectionStart, input.selectionEnd),
+  );
+  expect(selectedText).toBe("## Details");
 });
 
 test("reports Markdown quality issues and jumps to their source", async ({ page }) => {
@@ -104,7 +153,7 @@ test("saves the current draft locally and shows its save status", async ({ page 
   const editor = page.getByRole("textbox", { name: "Markdown input" });
   await editor.fill("# Draft");
 
-  await expect(page.locator("#draftStatus")).toHaveText("Saved locally");
+  await expect(page.locator("#draftStatus")).toHaveText("Unsaved file changes");
   await page.reload();
   await expect(editor).toHaveValue("# Draft");
 });

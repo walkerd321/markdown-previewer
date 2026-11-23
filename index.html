@@ -19,7 +19,14 @@
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">M↓</span>
           <span class="brand-name">Markdown Previewer</span>
-          <span id="appVersion" class="app-version" aria-label="Version 2.1.0">v2.1.0</span>
+          <span id="appVersion" class="app-version" aria-label="Version 2.2.0">v2.2.0</span>
+        </div>
+        <div class="document-controls" aria-label="Draft management">
+          <label class="sr-only" for="draftSelect">Draft</label>
+          <select id="draftSelect" class="draft-select"></select>
+          <label class="sr-only" for="draftName">Draft name</label>
+          <input id="draftName" class="draft-name" type="text" maxlength="80" value="Untitled" aria-label="Draft name" />
+          <button id="newDraft" class="text-button" type="button" title="Create a new draft">New</button>
         </div>
         <div class="actions">
           <label class="sr-only" for="themeSelect">Color theme</label>
@@ -43,9 +50,21 @@
             <div class="editor-header-tools">
               <span id="draftStatus" class="meta">Saved locally</span>
               <span class="shortcut-help">Ctrl/⌘ B bold · I italic · K link · S save</span>
+              <button id="findToggle" class="text-button" type="button" aria-expanded="false" aria-controls="findReplacePanel">Find</button>
               <button id="clear" class="text-button" type="button">Clear</button>
             </div>
           </div>
+          <section id="findReplacePanel" class="find-replace-panel" aria-label="Find and replace" hidden>
+            <label for="findInput">Find</label>
+            <input id="findInput" type="search" autocomplete="off" />
+            <label for="replaceInput">Replace</label>
+            <input id="replaceInput" type="text" autocomplete="off" />
+            <button id="findPrevious" class="text-button" type="button" aria-label="Previous match">Previous</button>
+            <button id="findNext" class="text-button" type="button" aria-label="Next match">Next</button>
+            <button id="replaceOne" class="text-button" type="button">Replace</button>
+            <button id="replaceAll" class="text-button" type="button">All</button>
+            <span id="findStatus" class="meta" aria-live="polite"></span>
+          </section>
           <textarea id="markdown" spellcheck="true" aria-label="Markdown input"></textarea>
           <div class="drop-hint" aria-hidden="true">Drop a Markdown file to import</div>
         </div>
@@ -67,6 +86,13 @@
             <span>PREVIEW</span>
             <div class="preview-header-tools">
               <button
+                id="outlineToggle"
+                class="text-button"
+                type="button"
+                aria-expanded="false"
+                aria-controls="outlinePanel"
+              >Outline</button>
+              <button
                 id="qualityToggle"
                 class="text-button"
                 type="button"
@@ -80,6 +106,9 @@
             <div id="qualitySummary" class="quality-summary" role="status" aria-live="polite"></div>
             <ul id="qualityResults" class="quality-results"></ul>
           </section>
+          <nav id="outlinePanel" class="outline-panel" aria-label="Document outline" hidden>
+            <ol id="outlineResults" class="outline-results"></ol>
+          </nav>
           <div id="preview" class="preview"></div>
         </article>
       </section>

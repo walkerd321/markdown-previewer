@@ -14,6 +14,17 @@ const qualityToggle = document.querySelector("#qualityToggle");
 const qualityPanel = document.querySelector("#qualityPanel");
 const qualitySummary = document.querySelector("#qualitySummary");
 const qualityResults = document.querySelector("#qualityResults");
+const draftSelect = document.querySelector("#draftSelect");
+const draftName = document.querySelector("#draftName");
+const newDraft = document.querySelector("#newDraft");
+const findToggle = document.querySelector("#findToggle");
+const findReplacePanel = document.querySelector("#findReplacePanel");
+const findInput = document.querySelector("#findInput");
+const replaceInput = document.querySelector("#replaceInput");
+const findStatus = document.querySelector("#findStatus");
+const outlineToggle = document.querySelector("#outlineToggle");
+const outlinePanel = document.querySelector("#outlinePanel");
+const outlineResults = document.querySelector("#outlineResults");
 
 themeSelect.value = document.documentElement.dataset.theme;
 themeSelect.addEventListener("change", () => {
@@ -64,13 +75,139 @@ function greet(name) {
 
 Try editing this content.`;
 
+const draftsKey = "markdown-previewer-drafts-v1";
+const activeDraftKey = "markdown-previewer-active-draft";
+let drafts = [];
+let activeDraftId = "";
+let dirty = false;
+let exportedBaseline = "";
+
+function createDraftId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `draft-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function loadDrafts() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(draftsKey) || "[]");
+    if (Array.isArray(stored)) {
+      drafts = stored
+        .filter((draft) => draft && typeof draft.id === "string" && typeof draft.content === "string")
+        .map((draft) => ({
+          id: draft.id,
+          name: typeof draft.name === "string" && draft.name.trim() ? draft.name.trim().slice(0, 80) : "Untitled",
+          content: draft.content,
+          updatedAt: Number(draft.updatedAt) || 0,
+        }));
+    }
+  } catch {
+    drafts = [];
+  }
+
+  if (!drafts.length) {
+    drafts.push({
+      id: createDraftId(),
+      name: "Untitled",
+      content: localStorage.getItem("markdown-previewer-content") ?? starter,
+      updatedAt: Date.now(),
+    });
+  }
+
+  const storedActiveId = localStorage.getItem(activeDraftKey);
+  activeDraftId = drafts.some((draft) => draft.id === storedActiveId)
+    ? storedActiveId
+    : drafts[0].id;
+}
+
+function persistDrafts() {
+  localStorage.setItem(draftsKey, JSON.stringify(drafts));
+  localStorage.setItem(activeDraftKey, activeDraftId);
+}
+
+function activeDraft() {
+  return drafts.find((draft) => draft.id === activeDraftId) || drafts[0];
+}
+
+function renderDraftPicker() {
+  draftSelect.replaceChildren();
+  for (const draft of drafts) {
+    const option = document.createElement("option");
+    option.value = draft.id;
+    option.textContent = draft.name;
+    draftSelect.append(option);
+  }
+  draftSelect.value = activeDraftId;
+  draftName.value = activeDraft()?.name || "Untitled";
+}
+
+function saveActiveDraft({ touch = false } = {}) {
+  const draft = activeDraft();
+  if (!draft) return;
+  draft.content = markdownInput.value;
+  draft.name = draftName.value.trim().slice(0, 80) || "Untitled";
+  if (touch) draft.updatedAt = Date.now();
+  draftName.value = draft.name;
+  localStorage.setItem("markdown-previewer-content", markdownInput.value);
+  persistDrafts();
+  renderDraftPicker();
+}
+
+function selectDraft(id) {
+  if (!drafts.some((draft) => draft.id === id)) return;
+  if (dirty && !window.confirm("Switch drafts? Unsaved Markdown file changes will remain in the locally saved draft.")) {
+    renderDraftPicker();
+    return;
+  }
+
+  saveActiveDraft();
+  activeDraftId = id;
+  const draft = activeDraft();
+  markdownInput.value = draft.content;
+  draftName.value = draft.name;
+  dirty = false;
+  exportedBaseline = draft.content;
+  persistDrafts();
+  renderDraftPicker();
+  updatePreview();
+  markdownInput.focus();
+}
+
+function createNewDraft() {
+  if (dirty && !window.confirm("Create a new draft? Unsaved Markdown file changes will remain in the locally saved draft.")) return;
+  saveActiveDraft();
+  const draft = {
+    id: createDraftId(),
+    name: `Draft ${drafts.length + 1}`,
+    content: "",
+    updatedAt: Date.now(),
+  };
+  drafts.push(draft);
+  activeDraftId = draft.id;
+  markdownInput.value = "";
+  draftName.value = draft.name;
+  dirty = false;
+  exportedBaseline = "";
+  persistDrafts();
+  renderDraftPicker();
+  updatePreview();
+  draftName.select();
+}
+
+function renameActiveDraft() {
+  saveActiveDraft();
+  renderDraftPicker();
+  showToast("Draft renamed");
+}
+
 function updatePreview() {
   preview.innerHTML = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);
   const words = markdownInput.value.trim().match(/\S+/g)?.length || 0;
   wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
   localStorage.setItem("markdown-previewer-content", markdownInput.value);
-  draftStatus.textContent = "Saved locally";
+  saveActiveDraft({ touch: true });
+  draftStatus.textContent = dirty ? "Unsaved file changes" : "Saved locally";
   if (!qualityPanel.hidden) renderQualityResults();
+  if (!outlinePanel.hidden) renderOutline();
 }
 
 function showToast(message) {
@@ -114,6 +251,169 @@ qualityToggle.addEventListener("click", () => {
   if (!isOpen) renderQualityResults();
 });
 
+function renderOutline() {
+  const headings = [];
+  const lines = markdownInput.value.split(/\r\n|\n|\r/);
+  let fence = null;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const fenceMarker = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (fenceMarker) {
+      const marker = fenceMarker[1];
+      if (!fence) fence = { character: marker[0], length: marker.length };
+      else if (marker[0] === fence.character && marker.length >= fence.length) fence = null;
+      continue;
+    }
+    if (fence) continue;
+
+    const atx = line.match(/^ {0,3}(#{1,6})[ \t]+(.+?)\s*#*\s*$/);
+    if (atx) {
+      headings.push({ level: atx[1].length, text: atx[2].trim(), line: index });
+      continue;
+    }
+    if (index > 0 && /^ {0,3}(?:=+|-+)\s*$/.test(line) && lines[index - 1].trim()) {
+      headings.push({ level: line.trim()[0] === "=" ? 1 : 2, text: lines[index - 1].trim(), line: index - 1 });
+    }
+  }
+
+  outlineResults.replaceChildren();
+  if (!headings.length) {
+    const empty = document.createElement("li");
+    empty.textContent = "No headings found.";
+    empty.className = "outline-item";
+    outlineResults.append(empty);
+    return;
+  }
+
+  for (const heading of headings) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "outline-item";
+    button.style.paddingLeft = `${(heading.level - 1) * 14}px`;
+    button.textContent = `${"·".repeat(heading.level - 1)} ${heading.text}`;
+    button.title = `Go to line ${heading.line + 1}`;
+    button.addEventListener("click", () => {
+      const sourceLines = markdownInput.value.split(/\r\n|\n|\r/);
+      const before = sourceLines.slice(0, heading.line);
+      let start = before.reduce((total, line) => total + line.length + 1, 0);
+      markdownInput.focus();
+      markdownInput.setSelectionRange(start, start + sourceLines[heading.line].length);
+      const lineHeight = Number.parseFloat(getComputedStyle(markdownInput).lineHeight);
+      markdownInput.scrollTop = Math.max(0, heading.line * lineHeight - markdownInput.clientHeight / 2);
+    });
+    item.append(button);
+    outlineResults.append(item);
+  }
+}
+
+outlineToggle.addEventListener("click", () => {
+  const isOpen = outlineToggle.getAttribute("aria-expanded") === "true";
+  outlineToggle.setAttribute("aria-expanded", String(!isOpen));
+  outlinePanel.hidden = isOpen;
+  if (!isOpen) renderOutline();
+});
+
+function findMatches(query) {
+  if (!query) return [];
+  const text = markdownInput.value;
+  const matches = [];
+  let start = 0;
+  while (start <= text.length) {
+    const index = text.toLowerCase().indexOf(query.toLowerCase(), start);
+    if (index === -1) break;
+    matches.push({ start: index, end: index + query.length });
+    start = index + Math.max(query.length, 1);
+  }
+  return matches;
+}
+
+let activeMatchIndex = -1;
+
+function showFindStatus() {
+  const query = findInput.value;
+  const matches = findMatches(query);
+  if (!query) {
+    findStatus.textContent = "";
+  } else if (!matches.length) {
+    findStatus.textContent = "No matches";
+  } else {
+    findStatus.textContent = activeMatchIndex >= 0
+      ? `${activeMatchIndex + 1} of ${matches.length}`
+      : `${matches.length} ${matches.length === 1 ? "match" : "matches"}`;
+  }
+}
+
+function findMatch(direction) {
+  const matches = findMatches(findInput.value);
+  if (!matches.length) {
+    activeMatchIndex = -1;
+    showFindStatus();
+    return;
+  }
+
+  if (activeMatchIndex < 0) {
+    activeMatchIndex = direction >= 0 ? 0 : matches.length - 1;
+  } else {
+    activeMatchIndex = (activeMatchIndex + direction + matches.length) % matches.length;
+  }
+  const match = matches[activeMatchIndex];
+  markdownInput.focus();
+  markdownInput.setSelectionRange(match.start, match.end);
+  showFindStatus();
+}
+
+findToggle.addEventListener("click", () => {
+  const isOpen = findToggle.getAttribute("aria-expanded") === "true";
+  findToggle.setAttribute("aria-expanded", String(!isOpen));
+  findReplacePanel.hidden = isOpen;
+  if (!isOpen) {
+    findInput.value = markdownInput.value.slice(markdownInput.selectionStart, markdownInput.selectionEnd);
+    findInput.focus();
+    activeMatchIndex = -1;
+    showFindStatus();
+  }
+});
+findInput.addEventListener("input", () => {
+  activeMatchIndex = -1;
+  showFindStatus();
+});
+findInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    findMatch(event.shiftKey ? -1 : 1);
+  }
+});
+document.querySelector("#findPrevious").addEventListener("click", () => findMatch(-1));
+document.querySelector("#findNext").addEventListener("click", () => findMatch(1));
+document.querySelector("#replaceOne").addEventListener("click", () => {
+  const query = findInput.value;
+  if (!query) return;
+  const matches = findMatches(query);
+  if (!matches.length) return;
+  const index = activeMatchIndex >= 0 ? activeMatchIndex : 0;
+  const match = matches[index];
+  markdownInput.setRangeText(replaceInput.value, match.start, match.end, "select");
+  dirty = true;
+  updatePreview();
+  activeMatchIndex = -1;
+  showFindStatus();
+});
+document.querySelector("#replaceAll").addEventListener("click", () => {
+  const query = findInput.value;
+  if (!query) return;
+  const matches = findMatches(query);
+  if (!matches.length) return;
+  let text = markdownInput.value;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  text = text.replace(new RegExp(escaped, "gi"), () => replaceInput.value);
+  markdownInput.value = text;
+  dirty = true;
+  updatePreview();
+  activeMatchIndex = -1;
+  showFindStatus();
+});
+
 function downloadFile(filename, contents, type) {
   const blob = new Blob([contents], { type });
   const url = URL.createObjectURL(blob);
@@ -126,6 +426,9 @@ function downloadFile(filename, contents, type) {
 
 function downloadMarkdown() {
   downloadFile("markdown-export.md", markdownInput.value, "text/markdown;charset=utf-8");
+  dirty = false;
+  exportedBaseline = markdownInput.value;
+  draftStatus.textContent = "Saved locally";
   showToast("Markdown downloaded");
 }
 
@@ -136,6 +439,7 @@ function wrapSelection(marker) {
   markdownInput.setRangeText(`${marker}${selected}${marker}`, start, end, "select");
   const selectionStart = start + marker.length;
   markdownInput.setSelectionRange(selectionStart, selectionStart + selected.length);
+  dirty = markdownInput.value !== exportedBaseline;
   updatePreview();
 }
 
@@ -147,6 +451,7 @@ function insertLink() {
   markdownInput.setRangeText(`[${label}](url)`, start, end, "select");
   const selectionStart = start + label.length + 3;
   markdownInput.setSelectionRange(selectionStart, selectionStart + 3);
+  dirty = markdownInput.value !== exportedBaseline;
   updatePreview();
 }
 
@@ -162,6 +467,7 @@ async function importMarkdownFile(file) {
       return;
     }
     markdownInput.value = await file.text();
+    dirty = markdownInput.value !== exportedBaseline;
     markdownInput.focus();
     updatePreview();
     showToast(`Imported ${file.name}`);
@@ -245,9 +551,22 @@ window.addEventListener("resize", applyPaneRatio);
 mobileLayout.addEventListener("change", applyPaneRatio);
 applyPaneRatio();
 
-markdownInput.value = localStorage.getItem("markdown-previewer-content") ?? starter;
-markdownInput.addEventListener("input", updatePreview);
+loadDrafts();
+renderDraftPicker();
+const initialDraft = activeDraft();
+markdownInput.value = initialDraft?.content ?? starter;
+exportedBaseline = markdownInput.value;
+markdownInput.addEventListener("input", () => {
+  dirty = markdownInput.value !== exportedBaseline;
+  draftStatus.textContent = dirty ? "Unsaved file changes" : "Saved locally";
+  updatePreview();
+});
 markdownInput.addEventListener("keydown", (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
+    event.preventDefault();
+    findToggle.click();
+    return;
+  }
   if (event.key === "Tab") {
     event.preventDefault();
     const start = markdownInput.selectionStart;
@@ -281,6 +600,7 @@ markdownInput.addEventListener("keydown", (event) => {
 document.querySelector("#clear").addEventListener("click", () => {
   if (markdownInput.value.trim() && !window.confirm("Clear your current draft? This cannot be undone.")) return;
   markdownInput.value = "";
+  dirty = markdownInput.value !== exportedBaseline;
   markdownInput.focus();
   updatePreview();
 });
@@ -320,6 +640,23 @@ editorPane.addEventListener("drop", (event) => {
 });
 
 document.querySelector("#downloadMarkdown").addEventListener("click", downloadMarkdown);
+
+draftSelect.addEventListener("change", () => selectDraft(draftSelect.value));
+draftName.addEventListener("change", renameActiveDraft);
+draftName.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.prevent();
+    renameActiveDraft();
+    draftName.blur();
+  }
+});
+newDraft.addEventListener("click", createNewDraft);
+
+window.addEventListener("beforeunload", (event) => {
+  if (!dirty) return;
+  event.preventDefault();
+  event.returnValue = "";
+});
 
 document.querySelector("#copyHtml").addEventListener("click", async () => {
   const html = renderMarkdown(markdownInput.value, globalThis.marked, globalThis.DOMPurify);

@@ -97,6 +97,35 @@ textarea {
   border-radius: 12px 12px 0 0;
 }
 
+.document-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0 12px;
+}
+
+.draft-select,
+.draft-name {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+}
+
+.draft-select {
+  width: 150px;
+}
+
+.draft-name {
+  width: 180px;
+  padding: 0 10px;
+  text-overflow: ellipsis;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -299,6 +328,73 @@ textarea {
 
 .editor-pane {
   position: relative;
+  grid-template-rows: 46px auto minmax(0, 1fr);
+}
+
+.find-replace-panel[hidden] {
+  display: none;
+}
+
+.find-replace-panel {
+  display: grid;
+  grid-template-columns: auto minmax(100px, 1fr) auto minmax(100px, 1fr) auto auto auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  font-size: 12px;
+}
+
+.find-replace-panel input {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+}
+
+.quality-panel[hidden],
+.outline-panel[hidden] {
+  display: none;
+}
+
+.outline-panel {
+  min-height: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.outline-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outline-item {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px 0;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline-item:hover,
+.outline-item:focus-visible {
+  color: var(--link);
 }
 
 .pane-header {
@@ -517,16 +613,29 @@ textarea {
 @media (max-width: 760px) {
   .app {
     padding: 0;
-    grid-template-rows: 116px minmax(0, 1fr);
+    grid-template-rows: 156px minmax(0, 1fr);
   }
 
   .toolbar {
     display: grid;
-    grid-template-rows: 28px minmax(0, 1fr);
+    grid-template-rows: 28px 32px 32px;
     align-content: center;
     gap: 4px;
     border-radius: 0;
     padding: 6px 12px;
+  }
+
+  .document-controls {
+    margin: 0;
+  }
+
+  .draft-select {
+    width: 128px;
+  }
+
+  .draft-name {
+    flex: 1;
+    width: auto;
   }
 
   .workspace {
@@ -574,6 +683,17 @@ textarea {
     padding: 0 4px;
     font-size: 12px;
     white-space: nowrap;
+  }
+
+  .find-replace-panel {
+    grid-template-columns: auto minmax(80px, 1fr) auto minmax(80px, 1fr);
+  }
+
+  .find-replace-panel #findPrevious,
+  .find-replace-panel #findNext,
+  .find-replace-panel #replaceOne,
+  .find-replace-panel #replaceAll {
+    padding: 4px;
   }
 }
 
