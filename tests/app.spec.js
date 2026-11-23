@@ -67,6 +67,16 @@ test("restores the narrow-screen workspace height", async ({ page }) => {
   expect(workspaceHeight).toBeGreaterThan(680);
 });
 
+test("uses equal-height stacked panes on narrow screens", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.evaluate(() => localStorage.setItem("markdown-previewer-pane-ratio", "0.2"));
+  await page.reload();
+
+  const editorHeight = await page.locator("#editorPane").evaluate((element) => element.getBoundingClientRect().height);
+  const previewHeight = await page.locator(".preview-pane").evaluate((element) => element.getBoundingClientRect().height);
+  expect(Math.abs(editorHeight - previewHeight)).toBeLessThan(2);
+});
+
 test("updates the preview as Markdown is edited", async ({ page }) => {
   await page.getByRole("textbox", { name: "Markdown input" }).fill("# Live\n\n**updated**");
 
