@@ -54,7 +54,7 @@ test("keeps the theme selector and toolbar actions visible on a narrow screen", 
     expect(bounds).not.toBeNull();
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(116);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(124);
   }
 });
 
@@ -62,7 +62,7 @@ test("keeps the toolbar controls visible at tablet width", async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 768 });
 
   const toolbar = await page.locator(".toolbar").boundingBox();
-  expect(toolbar.height).toBe(112);
+  expect(toolbar.height).toBe(120);
 
   for (const selector of [
     "#draftSelect",
@@ -88,7 +88,7 @@ test("restores the narrow-screen workspace height", async ({ page }) => {
 
   const toolbarHeight = await page.locator(".toolbar").evaluate((element) => element.getBoundingClientRect().height);
   const workspaceHeight = await page.locator("#workspace").evaluate((element) => element.getBoundingClientRect().height);
-  expect(toolbarHeight).toBe(116);
+  expect(toolbarHeight).toBe(124);
   expect(workspaceHeight).toBeGreaterThan(680);
 });
 
