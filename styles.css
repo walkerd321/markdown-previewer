@@ -613,16 +613,16 @@ textarea {
 @media (max-width: 760px) {
   .app {
     padding: 0;
-    grid-template-rows: 156px minmax(0, 1fr);
+    grid-template-rows: 116px minmax(0, 1fr);
   }
 
   .toolbar {
     display: grid;
-    grid-template-rows: 28px 32px 32px;
+    grid-template-rows: 24px 26px 26px;
     align-content: center;
-    gap: 4px;
+    gap: 1px;
     border-radius: 0;
-    padding: 6px 12px;
+    padding: 3px 12px;
   }
 
   .document-controls {
@@ -631,11 +631,13 @@ textarea {
 
   .draft-select {
     width: 128px;
+    height: 26px;
   }
 
   .draft-name {
     flex: 1;
     width: auto;
+    height: 26px;
   }
 
   .workspace {
@@ -671,7 +673,7 @@ textarea {
   .theme-select {
     width: 100%;
     max-width: none;
-    height: 32px;
+    height: 26px;
     padding: 0 6px;
     font-size: 12px;
   }
@@ -679,7 +681,7 @@ textarea {
   .button {
     width: 100%;
     min-width: 0;
-    height: 32px;
+    height: 26px;
     padding: 0 4px;
     font-size: 12px;
     white-space: nowrap;
