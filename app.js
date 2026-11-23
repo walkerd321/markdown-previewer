@@ -25,6 +25,8 @@ const findStatus = document.querySelector("#findStatus");
 const outlineToggle = document.querySelector("#outlineToggle");
 const outlinePanel = document.querySelector("#outlinePanel");
 const outlineResults = document.querySelector("#outlineResults");
+const syncScroll = document.querySelector("#syncScroll");
+const focusModeButton = document.querySelector("#focusMode");
 
 themeSelect.value = document.documentElement.dataset.theme;
 themeSelect.addEventListener("change", () => {
@@ -517,6 +519,68 @@ function updatePaneRatioFromPointer(event) {
   applyPaneRatio();
 }
 
+syncScroll.checked = localStorage.getItem("markdown-previewer-sync-scroll") === "true";
+syncScroll.addEventListener("change", () => {
+  localStorage.setItem("markdown-previewer-sync-scroll", String(syncScroll.checked));
+});
+
+let scrollingFromEditor = false;
+let scrollingFromPreview = false;
+
+markdownInput.addEventListener("scroll", () => {
+  if (!syncScroll.checked || scrollingFromPreview) return;
+  const maxSource = markdownInput.scrollHeight - markdownInput.clientHeight;
+  const maxTarget = preview.scrollHeight - preview.clientHeight;
+  if (maxSource <= 0 || maxTarget <= 0) return;
+  scrollingFromEditor = true;
+  preview.scrollTop = (markdownInput.scrollTop / maxSource) * maxTarget;
+  requestAnimationFrame(() => {
+    scrollingFromEditor = false;
+  });
+});
+
+preview.addEventListener("scroll", () => {
+  if (!syncScroll.checked || scrollingFromEditor) return;
+  const maxSource = preview.scrollHeight - preview.clientHeight;
+  const maxTarget = markdownInput.scrollHeight - markdownInput.clientHeight;
+  if (maxSource <= 0 || maxTarget <= 0) return;
+  scrollingFromPreview = true;
+  markdownInput.scrollTop = (preview.scrollTop / maxSource) * maxTarget;
+  requestAnimationFrame(() => {
+    scrollingFromPreview = false;
+  });
+});
+
+focusModeButton.addEventListener("click", () => {
+  const active = document.body.classList.toggle("focus-mode");
+  focusModeButton.setAttribute("aria-pressed", String(active));
+  focusModeButton.textContent = active ? "Exit focus" : "Focus";
+  requestAnimationFrame(applyPaneRatio);
+});
+
+function insertPastedImage(file) {
+  if (!file.type.startsWith("image/")) return false;
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const start = markdownInput.selectionStart;
+    const end = markdownInput.selectionEnd;
+    const name = file.name.replace(/\.[^.]+$/, "") || "pasted-image";
+    markdownInput.setRangeText(`![${name}](${reader.result})`, start, end, "end");
+    dirty = markdownInput.value !== exportedBaseline;
+    updatePreview();
+    showToast("Image embedded");
+  });
+  reader.readAsDataURL(file);
+  return true;
+}
+
+markdownInput.addEventListener("paste", (event) => {
+  const image = [...(event.clipboardData?.files || [])].find((file) => file.type.startsWith("image/"));
+  if (!image) return;
+  event.preventDefault();
+  insertPastedImage(image);
+});
+
 let resizing = false;
 resizeHandle.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
@@ -574,6 +638,10 @@ markdownInput.addEventListener("input", () => {
   updatePreview();
 });
 markdownInput.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.body.classList.contains("focus-mode")) {
+    focusModeButton.click();
+    return;
+  }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
     event.preventDefault();
     findToggle.click();
@@ -668,6 +736,12 @@ window.addEventListener("beforeunload", (event) => {
   if (!dirty) return;
   event.preventDefault();
   event.returnValue = "";
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !document.body.classList.contains("focus-mode")) return;
+  event.preventDefault();
+  focusModeButton.click();
 });
 
 document.querySelector("#printPreview").addEventListener("click", () => {

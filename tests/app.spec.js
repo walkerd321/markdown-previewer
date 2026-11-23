@@ -134,6 +134,37 @@ test("updates the preview as Markdown is edited", async ({ page }) => {
   await expect(page.locator("#preview strong")).toHaveText("updated");
 });
 
+test("toggles focus mode and exits with Escape", async ({ page }) => {
+  await page.getByRole("button", { name: "Focus" }).click();
+  await expect(page.locator("body")).toHaveClass(/focus-mode/);
+  await page.getByRole("textbox", { name: "Markdown input" }).press("Escape");
+  await expect(page.locator("body")).not.toHaveClass(/focus-mode/);
+});
+
+test("persists synchronized scrolling", async ({ page }) => {
+  await page.getByLabel("Sync scroll").check();
+  await page.reload();
+  await expect(page.getByLabel("Sync scroll")).toBeChecked();
+});
+
+test("embeds a pasted image as a local Markdown data URL", async ({ page }) => {
+  await page.getByRole("textbox", { name: "Markdown input" }).evaluate((input) => {
+    input.focus();
+    input.setSelectionRange(0, 0);
+    const bytes = new Uint8Array([137, 80, 78, 71]);
+    const file = new File([bytes], "diagram.png", { type: "image/png" });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    input.dispatchEvent(new ClipboardEvent("paste", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData: dataTransfer,
+    }));
+  });
+
+  await expect(page.getByRole("textbox", { name: "Markdown input" })).toHaveValue(/!\[diagram\]\(data:image\/png;base64,/);
+});
+
 test("creates, renames, switches, and preserves named drafts", async ({ page }) => {
   await page.getByLabel("Draft name").fill("Project Notes");
   await page.getByLabel("Draft name").press("Enter");
