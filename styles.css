@@ -618,6 +618,7 @@ textarea {
 
   .toolbar {
     display: grid;
+    height: 116px;
     grid-template-rows: 24px 26px 26px;
     align-content: center;
     gap: 1px;
